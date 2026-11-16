@@ -2,7 +2,7 @@ package znusr
 
 import "slices"
 
-// unpack returns the last, the last but one, and the rest of arguments
+// unpack returns the last, the last but 'one, and the rest of arguments
 func unpack(x ...int) (int, int, []int) {
 	m := len(x)
 	return x[m-1], x[m-2], x[:m-2]

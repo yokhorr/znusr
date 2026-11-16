@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	fmt.Print(znusr.Mult(3, 7))
+	fmt.Print(znusr.Len(9))
 }
