@@ -151,15 +151,13 @@ func constantly(a int) func(...int) int {
 }
 
 // eq returns 1, if a == b
-//
-//	or 0, otherwise
+// or 0, otherwise
 func eq(a, b int) int {
 	return and(ge(a, b), ge(b, a))
 }
 
 // gt returns 1, if a > b,
-//
-//	and 0, otherwise
+// and 0, otherwise
 func gt(a, b int) int {
 	A := ge(a, b)
 	B := not(eq(a, b))
@@ -167,22 +165,19 @@ func gt(a, b int) int {
 }
 
 // le returns 1, if a <= b,
-//
-//	and 0, otherwise
+// and 0, otherwise
 func le(a, b int) int {
 	return not(gt(b, a))
 }
 
 // and returns 1, if a >= 1 and b >= 1
-//
-//	or 0, otherwise
+// or 0, otherwise
 func and(a, b int) int {
 	return Mult(boolean(a), boolean(b))
 }
 
 // isPrime returns 1, if n is prime
-//
-//	and 0, otherwise
+// and 0, otherwise
 func isPrime(n int) int {
 	f := constantly(one(n))
 
@@ -201,8 +196,7 @@ func neq(a, b int) int {
 }
 
 // updIfZero returns a, if a > 0
-//
-//	and b, if a == 0
+// and b, if a == 0
 func updIfZero(a, b int) int {
 	A := a * gt(a, Z(a))
 	B := b * eq(a, Z(a))
@@ -289,7 +283,7 @@ func Plog(n, k int) int {
 
 func plog_(n, k int) int {
 	p := 0
-	for k%n == 0 {
+	for k != 0 && k%n == 0 {
 		k /= n
 		p++
 	}
@@ -314,4 +308,17 @@ func Len(L int) int {
 	}
 
 	return R(f, g)(L, L+1)
+}
+
+func Sublist(L, I, d int) int {
+	f := constantly(1)
+
+	g := func(x ...int) int {
+		res, yi, args := unpack(x...)
+		l := U(0)(args...)
+		i := U(1)(args...)
+		return res * (pow_(nthPrime_(yi+1), plog_(nthPrime_(i+yi+1), l)))
+	}
+
+	return R(f, g)(L, I, d)
 }

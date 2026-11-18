@@ -6,5 +6,5 @@ import (
 )
 
 func main() {
-	fmt.Print(znusr.Len(9))
+	fmt.Print(znusr.Sublist(1134472500, 2, 2))
 }
