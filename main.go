@@ -6,5 +6,11 @@ import (
 )
 
 func main() {
-	fmt.Print(znusr.Sublist(1134472500, 2, 2))
+	tests := [][]int{
+		[]int{1134472500, 2, 2},
+	}
+
+	for _, test := range tests {
+		fmt.Println(znusr.Sublist(test))
+	}
 }

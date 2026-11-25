@@ -1,262 +1,209 @@
 package znusr
 
-import "slices"
+var Add = R(U(1, 1), S(N, U(3, 3)))
 
-func zeroVariadic(x ...int) int {
-	return Z(x[0])
+func Add_(args []int) int {
+	return args[0] + args[1]
 }
 
-func addN(n int) func(int) int {
-	f := U(0)
-
-	g := func(x ...int) int {
-		res, _, _ := unpack(x...)
-		return N(res)
-	}
-
-	return func(x int) int {
-		return R(f, g)(n, x)
-	}
+// task 8.8a
+func Mult_(args []int) int {
+	return args[0] * args[1]
 }
 
-// Add takes two arguments: a, b;
-// and returns a + b
-func Add(x ...int) int {
-	a := U(0)(x...)
-	b := U(1)(x...)
-	return addN(a)(b)
+// task 8.8a
+func Sub_(args []int) int {
+	return max(args[0]-args[1], 0)
 }
 
-func multN(n int) func(int) int {
-	f := zeroVariadic
+var One = S(N, Z)
 
-	g := func(x ...int) int {
-		res, _, args := unpack(x...)
-		delta := U(0)(args...)
-		return addN(delta)(res)
-	}
+// GE returns takes a and b and returns 1 if a >= b or 0 otherwise
+var GE = S(Sub_, One, S(Sub_, U(2, 2), U(2, 1)))
 
-	return func(x int) int {
-		return R(f, g)(n, x)
-	}
+// task 8.8b
+func Div_(args []int) int {
+	return args[0] / args[1]
 }
 
-// Mult takes two arguments: a, b;
-// and returns a * b
-func Mult(x ...int) int {
-	return multN(U(0)(x...))(U(1)(x...))
+// task 8.8b
+func Mod_(args []int) int {
+	return args[0] % args[1]
 }
 
-func pred(x int) int {
-	f := zeroVariadic
+// Not returns 1, if x = 0 or 0 otherwise
+var Not = S(Sub_, One, U(1, 1))
 
-	g := func(x ...int) int {
-		_, yi, _ := unpack(x...)
-		return yi
-	}
+// IsMultipleOf returns 1, if a is multiple of b
+// or 0, otherwise
+var IsMultipleOf = S(Not, S(Mod_, U(2, 1), U(2, 2)))
 
-	return R(f, g)(x, x)
-}
-
-func subN(n int) func(int) int {
-	f := U(0)
-
-	g := func(x ...int) int {
-		res, _, _ := unpack(x...)
-		return pred(res)
-	}
-
-	return func(x int) int {
-		return R(f, g)(x, n)
-	}
-}
-
-// Sub takes two arguments: a, b;
-// and returns max(a - b, 0)
-func Sub(x ...int) int {
-	return subN(U(1)(x...))(U(0)(x...))
-}
-
-func one(x int) int {
-	return N(Z(x))
-}
-
-// ge takes two arguments: a, b;
-// and returns 1, if a >= b,
-//
-//	or 0, otherwise
-func ge(x ...int) int {
-	a := U(0)(x...)
-	b := U(1)(x...)
-	return Sub(one(a), Sub(b, a))
-}
-
-// Div takes two arguments: a, b;
-// and return floor(a / b)
-func Div(x ...int) int {
-	f := zeroVariadic
-
-	g := func(x ...int) int {
-		res, yi, args := unpack(x...)
-		a := U(0)(args...)
-		b := U(1)(args...)
-
-		return res + ge(a, b*N(yi))
-	}
-
-	return R(f, g)(append(slices.Clone(x), U(0)(x...))...)
-}
-
-// Mod takes two arguments: a, b;
-// and return a % b
-func Mod(x ...int) int {
-	a := U(0)(x...)
-	b := U(1)(x...)
-
-	return a - b*Div(a, b)
-}
-
-// not returns 1, if x = 0
-//
-//	or 0, otherwise
-func not(x int) int {
-	return Sub(1, x)
-}
-
-// boolean returns 1, if x = 1,
-//
-//	or 0, otherwise
-func boolean(x int) int {
-	return not(not(x))
-}
-
-// isMultipleOf returns 1, if a is multiple of b
-//
-//	or 0, otherwise
-func isMultipleOf(a, b int) int {
-	return not(Mod(a, b))
-}
-
-func isMultipleOf_(a, b int) int {
-	if a%b == 0 {
+func IsMultipleOf_(args []int) int {
+	if args[0]%args[1] == 0 {
 		return 1
 	}
 	return 0
 }
 
-func constantly(a int) func(...int) int {
-	return func(...int) int {
-		return a
-	}
-}
-
-// eq returns 1, if a == b
+// Eq returns 1, if a == b
 // or 0, otherwise
-func eq(a, b int) int {
-	return and(ge(a, b), ge(b, a))
-}
+var Eq = S(Mult_, S(GE, U(2, 1), U(2, 2)), S(GE, U(2, 2), U(2, 1)))
 
-// gt returns 1, if a > b,
-// and 0, otherwise
-func gt(a, b int) int {
-	A := ge(a, b)
-	B := not(eq(a, b))
-	return and(A, B)
-}
-
-// le returns 1, if a <= b,
-// and 0, otherwise
-func le(a, b int) int {
-	return not(gt(b, a))
-}
-
-// and returns 1, if a >= 1 and b >= 1
-// or 0, otherwise
-func and(a, b int) int {
-	return Mult(boolean(a), boolean(b))
-}
-
-// isPrime returns 1, if n is prime
-// and 0, otherwise
-func isPrime(n int) int {
-	f := constantly(one(n))
-
-	g := func(x ...int) int {
-		res, yi, args := unpack(x...)
-		arg := U(0)(args...)
-
-		return Mult(res, not(isMultipleOf(arg, addN(2)(yi))))
+func Eq_(args []int) int {
+	if args[0] == args[1] {
+		return 1
 	}
-
-	return R(f, g)(n, n-2) * not(eq(n, 1)) * not(eq(n, 0))
+	return 0
 }
 
-func neq(a, b int) int {
-	return not(eq(a, b))
+// Gt returns 1, if a > b,
+// and 0, otherwise
+var Gt = S(Mult_, S(GE, U(2, 1), U(2, 2)), S(Not, S(Eq, U(2, 1), U(2, 2))))
+
+func GT_(args []int) int {
+	if args[0] > args[1] {
+		return 1
+	}
+	return 0
 }
 
-// updIfZero returns a, if a > 0
+// Le returns 1, if a <= b,
+// and 0, otherwise
+var Le = S(Not, S(Gt, U(2, 1), U(2, 2)))
+
+func Le_(args []int) int {
+	if args[0] <= args[1] {
+		return 1
+	}
+	return 0
+}
+
+var Two = S(N, One)
+
+// Neq returns 1 if a != b
+// or 0, otherwise
+var Neq = S(Not, S(Eq, U(2, 1), U(2, 2)))
+
+var IsPrimeG = S(
+	Mult_,
+	U(3, 3),
+	S(Not, S(IsMultipleOf, U(3, 1), S(Add, Two, U(3, 2)))),
+)
+
+var IsPrimeR = S(
+	R(One, IsPrimeG),
+	U(1, 1),
+	S(Sub_, U(1, 1), Two),
+)
+
+// IsPrime returns 1, if n is prime
+// and 0, otherwise
+var IsPrime = S(
+	Mult_,
+	IsPrimeR,
+	S(Mult_,
+		S(Neq, U(1, 1), One),
+		S(Neq, U(1, 1), Z),
+	),
+)
+
+func IsPrime_(args []int) int {
+	for d := 2; d*d <= args[0]; d++ {
+		if args[0]%d == 0 {
+			return 0
+		}
+	}
+	return 1
+}
+
+// UpdIfZero returns a, if a > 0
 // and b, if a == 0
-func updIfZero(a, b int) int {
-	A := a * gt(a, Z(a))
-	B := b * eq(a, Z(a))
-	return A + B
-}
+var UpdIfZero = S(
+	Add,
 
-func updIfNonZero(a, b int) int {
-	return neq(b, 0)*b + eq(b, 0)*a
-}
+	S(Mult_,
+		U(2, 1),
+		S(Gt, U(2, 1), Z),
+	),
 
-func updIfNonZero_(a, b int) int {
-	if b != 0 {
-		return b
+	S(Mult_,
+		U(2, 2),
+		S(Eq, U(2, 1), Z),
+	),
+)
+
+func UpdIfZero_(args []int) int {
+	if args[0] > 0 {
+		return args[0]
 	}
-	return a
+	return args[1]
 }
 
-// firstPrime returns the first prime number in [l, r]
-func firstPrime(a, b int) int {
-	f := zeroVariadic
+// UpdIfNonZero returns b, if b != 0
+// and a, if b == 0
+var UpdIfNonZero = S(
+	Add,
 
-	g := func(x ...int) int {
-		res, yi, args := unpack(x...)
-		l := U(0)(args...)
+	S(Mult_,
+		S(Neq, U(2, 2), Z),
+		U(2, 2),
+	),
 
-		return updIfZero(res, (yi+l)*isPrime(yi+l))
+	S(Mult_,
+		S(Eq, U(2, 2), Z),
+		U(2, 1),
+	),
+)
+
+func UpdIfNonZero_(args []int) int {
+	if args[1] != 0 {
+		return args[1]
 	}
-
-	return R(f, g)(a, b, b-a+one(b))
+	return args[0]
 }
 
-func two(x int) int {
-	return N(one(x))
-}
+var FirstPrimeG = S(
+	UpdIfZero,
+	U(3, 3),
+	S(Mult_,
+		S(Add, U(3, 2), U(3, 1)),
+		S(IsPrime, S(Add, U(3, 2), U(3, 1)))),
+)
+
+var FirstPrimeR = R(Z, FirstPrimeG)
+
+// FirstPrime returns the first prime number in [a, b]
+var FirstPrime = S(
+	FirstPrimeR,
+	U(2, 1),
+	S(Add, S(Sub_, U(2, 2), U(2, 1)), One),
+)
+
+var NthPrimeG = S(
+	FirstPrime,
+	S(Add, U(3, 3), One),
+	S(Mult_, Two, S(Add, U(3, 3), One)),
+)
 
 // NthPrime returns n-th prime, assuming n >= 1
-func NthPrime(n int) int {
-	f := constantly(1)
+var NthPrime = S(
+	R(One, NthPrimeG),
+	U(1, 1),
+	U(1, 1),
+)
 
-	g := func(x ...int) int {
-		res, _, _ := unpack(x...)
-		return firstPrime(res+1, 2*(res+1))
-	}
-
-	return R(f, g)(n, n)
+func NthPrime_(args []int) int {
+	return first1000000Primes[args[0]-1]
 }
 
-func pow(a, n int) int {
-	f := constantly(1)
+var PowG = S(Mult_, U(3, 3), U(3, 1))
 
-	g := func(x ...int) int {
-		res, _, args := unpack(x...)
-		delta := U(0)(args...)
-		return res * delta
-	}
+var Pow = S(R(One, PowG), U(2, 1), U(2, 2))
 
-	return R(f, g)(a, n)
-}
+func Pow_(args []int) int {
+	a := args[0]
+	n := args[1]
 
-func pow_(a, n int) int {
 	res := 1
 	for n > 0 {
 		if n%2 == 1 {
@@ -268,20 +215,31 @@ func pow_(a, n int) int {
 	return res
 }
 
+var PlogG = S(UpdIfNonZero,
+	U(4, 4),
+	S(Mult_,
+		U(4, 3),
+		S(IsMultipleOf,
+			U(4, 2),
+			S(Pow,
+				U(4, 1),
+				U(4, 3),
+			),
+		),
+	),
+)
+
 // Plog returns max{p | k ⫶ n^p}, assuming n > 1
-func Plog(n, k int) int {
-	f := constantly(0)
+var Plog = S(R(Z, PlogG),
+	U(2, 1),
+	U(2, 2),
+	S(Add, U(2, 2), One),
+)
 
-	g := func(x ...int) int {
-		res, yi, args := unpack(x...)
-		n, k := U(0)(args...), U(1)(args...)
-		return updIfNonZero(res, yi*isMultipleOf_(k, pow_(n, yi)))
-	}
+func Plog_(args []int) int {
+	n := args[0]
+	k := args[1]
 
-	return R(f, g)(n, k, k+1)
-}
-
-func plog_(n, k int) int {
 	p := 0
 	for k != 0 && k%n == 0 {
 		k /= n
@@ -290,35 +248,32 @@ func plog_(n, k int) int {
 	return p
 }
 
-// nthPrime_ returns the n-th prime for 1 <= n <= 1_000_000.
-func nthPrime_(n int) int {
-	if n < 1 || n > len(first1000000Primes) {
-		panic("NthPrimeTable: n must be in [1, 1_000_000]")
-	}
-	return first1000000Primes[n-1]
-}
+var SublistG = S(Mult_,
+	U(4, 4),
+	S(Pow_,
+		S(NthPrime_, S(Add_, U(4, 3), One)),
+		S(Plog_,
+			S(NthPrime_, S(Add_, U(4, 2), S(Add_, U(4, 3), One))),
+			U(4, 1),
+		),
+	),
+)
 
-func Len(L int) int {
-	f := constantly(0)
+var Sublist = S(R(One, SublistG),
+	U(3, 1),
+	U(3, 2),
+	U(3, 3),
+)
 
-	g := func(x ...int) int {
-		res, yi, args := unpack(x...)
-		l := U(0)(args...)
-		return updIfNonZero_(res, (yi+1)*isMultipleOf_(l, nthPrime_(yi+1)))
-	}
-
-	return R(f, g)(L, L+1)
-}
-
-func Sublist(L, I, d int) int {
-	f := constantly(1)
-
-	g := func(x ...int) int {
-		res, yi, args := unpack(x...)
-		l := U(0)(args...)
-		i := U(1)(args...)
-		return res * (pow_(nthPrime_(yi+1), plog_(nthPrime_(i+yi+1), l)))
-	}
-
-	return R(f, g)(L, I, d)
-}
+//func Sublist(L, I, d int) int {
+//	f := constantly(1)
+//
+//	g := func(x ...int) int {
+//		res, yi, args := unpack(x...)
+//		l := U(0)(args...)
+//		i := U(1)(args...)
+//		return res * (pow_(nthPrime_(yi+1), plog_(nthPrime_(i+yi+1), l)))
+//	}
+//
+//	return R(f, g)(L, I, d)
+//}

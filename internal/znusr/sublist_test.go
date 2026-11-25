@@ -84,7 +84,7 @@ func TestSublist(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := Sublist(tt.L, tt.I, tt.d)
+			got := Sublist([]int{tt.L, tt.I, tt.d})
 
 			if got != tt.want {
 				t.Errorf(
